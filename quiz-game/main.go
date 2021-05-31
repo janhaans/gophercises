@@ -14,10 +14,13 @@ func main() {
 	csvPtr := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer'")
 	flag.Parse()
 
-	play(*csvPtr)
+	numQuestions, numAnswers := play(*csvPtr)
+	fmt.Printf("Total questions = %d\n", numQuestions)
+	fmt.Printf("Correct answers = %d\n", numAnswers)
+
 }
 
-func play(csvFileName string) {
+func play(csvFileName string) (numQuestions, numAnswers int) {
 	f, err := os.Open(csvFileName)
 	if err != nil {
 		log.Fatalln(err)
@@ -31,22 +34,20 @@ func play(csvFileName string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	numQuestions = len(records)
+
 	for i, record := range records {
 		question := record[0]
-		goodAnswer := record[1]
-		for {
-			fmt.Printf("Question %d: %s = ", i, question)
-			answer, err := input.ReadString('\n')
-			if err != nil {
-				log.Fatalln(err)
-			}
-			if strings.TrimSpace(answer) != goodAnswer {
-				fmt.Println("Try again")
-			} else {
-				break
-			}
+		answer := record[1]
+		fmt.Printf("Question %d: %s = ", i, question)
+		playerAnswer, err := input.ReadString('\n')
+		if err != nil {
+			log.Fatalln(err)
+		}
+		if strings.TrimSpace(playerAnswer) == answer {
+			numAnswers += 1
 		}
 	}
 
-	fmt.Println("Congratulations you have finished the quiz!")
+	return numQuestions, numAnswers
 }
