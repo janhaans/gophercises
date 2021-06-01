@@ -45,35 +45,38 @@ func GetQuiz(file string, limit int) *Quiz {
 }
 
 func Play(q *Quiz) {
-	done := make(chan bool)
-	go q.Play(done)
+	done := q.Play()
 	<-done
 }
 
-func (q *Quiz) Play(done chan bool) {
+func (q *Quiz) Play() <-chan bool {
+	done := make(chan bool)
+	go func() {
+		input := bufio.NewReader(os.Stdin)
 
-	input := bufio.NewReader(os.Stdin)
-
-	fmt.Println("Press Enter to start the quiz")
-	_, err := input.ReadString('\n')
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	go timer(done, q.Limit)
-
-	for i, item := range q.Items {
-		fmt.Printf("Question %d: %s = ", i, item.Question)
-		playerAnswer, err := input.ReadString('\n')
+		fmt.Println("Press Enter to start the quiz")
+		_, err := input.ReadString('\n')
 		if err != nil {
 			log.Fatalln(err)
 		}
-		if strings.TrimSpace(playerAnswer) == item.Answer {
-			q.Score += 1
-		}
-	}
 
-	done <- true
+		go timer(done, q.Limit)
+
+		for i, item := range q.Items {
+			fmt.Printf("Question %d: %s = ", i, item.Question)
+			playerAnswer, err := input.ReadString('\n')
+			if err != nil {
+				log.Fatalln(err)
+			}
+			if strings.TrimSpace(playerAnswer) == item.Answer {
+				q.Score += 1
+			}
+		}
+
+		done <- true
+	}()
+
+	return done
 }
 
 func timer(done chan bool, limit int) {
