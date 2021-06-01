@@ -1,4 +1,4 @@
-package quiz
+package game
 
 import (
 	"bufio"
@@ -44,7 +44,14 @@ func GetQuiz(file string, limit int) *Quiz {
 	return &quiz
 }
 
-func (q *Quiz) Play(c chan bool) {
+func Play(q *Quiz) {
+	done := make(chan bool)
+	go q.Play(done)
+	<-done
+}
+
+func (q *Quiz) Play(done chan bool) {
+
 	input := bufio.NewReader(os.Stdin)
 
 	fmt.Println("Press Enter to start the quiz")
@@ -53,7 +60,7 @@ func (q *Quiz) Play(c chan bool) {
 		log.Fatalln(err)
 	}
 
-	go timer(c, q.Limit)
+	go timer(done, q.Limit)
 
 	for i, item := range q.Items {
 		fmt.Printf("Question %d: %s = ", i, item.Question)
@@ -66,10 +73,10 @@ func (q *Quiz) Play(c chan bool) {
 		}
 	}
 
-	c <- true
+	done <- true
 }
 
-func timer(c chan bool, limit int) {
+func timer(done chan bool, limit int) {
 	time.Sleep(time.Duration(limit) * time.Second)
-	c <- true
+	done <- true
 }
