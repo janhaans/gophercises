@@ -54,7 +54,7 @@ func (q *Quiz) Play() <-chan bool {
 	go func() {
 		input := bufio.NewReader(os.Stdin)
 
-		fmt.Println("Press Enter to start the quiz")
+		fmt.Print("Press Enter to start the quiz")
 		_, err := input.ReadString('\n')
 		if err != nil {
 			log.Fatalln(err)
