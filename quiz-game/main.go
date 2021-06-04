@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/janhaans/quiz-game/game"
+	"github.com/janhaans/gophercises/quiz-game/game"
 )
 
 func main() {
