@@ -1,3 +1,4 @@
+//package game creates and plays a quiz in wich questions are asked
 package game
 
 import (
@@ -10,17 +11,21 @@ import (
 	"time"
 )
 
-type QuizItem struct {
+//Problem type has a question and answer
+type Problem struct {
 	Question string
 	Answer   string
 }
 
+//Quiz type has problems, manages the score and sets a limit to the duration of the quiz
 type Quiz struct {
-	Items []QuizItem
-	Score int
-	Limit int
+	Problems []Problem
+	Score    int
+	Limit    int
 }
 
+//GetQuiz receives csv file name that has questions and answers and limit that represents the duration of the quiz in seconds
+//and returns a pointer to Quiz
 func GetQuiz(file string, limit int) *Quiz {
 	quiz := Quiz{Limit: limit}
 
@@ -37,19 +42,15 @@ func GetQuiz(file string, limit int) *Quiz {
 	}
 
 	for _, record := range records {
-		quizItem := QuizItem{Question: record[0], Answer: record[1]}
-		quiz.Items = append(quiz.Items, quizItem)
+		problem := Problem{Question: record[0], Answer: record[1]}
+		quiz.Problems = append(quiz.Problems, problem)
 	}
 
 	return &quiz
 }
 
-func Play(q *Quiz) {
-	done := q.Play()
-	<-done
-}
-
-func (q *Quiz) Play() <-chan bool {
+//Play the quiz
+func (q *Quiz) Play() {
 	done := make(chan bool)
 	go func() {
 		input := bufio.NewReader(os.Stdin)
@@ -62,13 +63,13 @@ func (q *Quiz) Play() <-chan bool {
 
 		go timer(done, q.Limit)
 
-		for i, item := range q.Items {
-			fmt.Printf("Question %d: %s = ", i, item.Question)
+		for i, problem := range q.Problems {
+			fmt.Printf("Question %d: %s = ", i, problem.Question)
 			playerAnswer, err := input.ReadString('\n')
 			if err != nil {
 				log.Fatalln(err)
 			}
-			if strings.TrimSpace(playerAnswer) == item.Answer {
+			if strings.TrimSpace(playerAnswer) == problem.Answer {
 				q.Score += 1
 			}
 		}
@@ -76,9 +77,10 @@ func (q *Quiz) Play() <-chan bool {
 		done <- true
 	}()
 
-	return done
+	<-done
 }
 
+//timer ends the quiz when the time is gone
 func timer(done chan bool, limit int) {
 	time.Sleep(time.Duration(limit) * time.Second)
 	done <- true

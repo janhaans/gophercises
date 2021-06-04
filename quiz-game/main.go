@@ -9,13 +9,13 @@ import (
 
 func main() {
 	csvPtr := flag.String("csv", "problems.csv", "a csv file in the format of 'question,answer'")
-	limitPtr := flag.Int("limit", 30, "the time limit for the quiz in seconds (defaul 30)")
+	limitPtr := flag.Int("limit", 30, "the time limit for the quiz in seconds")
 	flag.Parse()
 
 	quiz := game.GetQuiz(*csvPtr, *limitPtr)
-	game.Play(quiz)
+	quiz.Play()
 
-	fmt.Printf("\nTotal questions = %d\n", len(quiz.Items))
+	fmt.Printf("\nTotal questions = %d\n", len(quiz.Problems))
 	fmt.Printf("Correct answers = %d\n", quiz.Score)
 
 }
