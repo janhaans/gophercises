@@ -1,3 +1,3 @@
-module github.com/janhaans/quiz-game
+module github.com/janhaans/gophercises/quiz-game
 
 go 1.16
